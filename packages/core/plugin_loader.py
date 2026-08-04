@@ -391,20 +391,38 @@ class PluginLoader:
     def _import_plugin(self, plugin_dir: Path, manifest: PluginManifest) -> PluginBase:
         """
         Dynamically import the plugin module and instantiate the plugin class.
-
-        entry_point format: "module.path:ClassName"
-        e.g., "plugin.main:ESP32Plugin"
+        Uses importlib.util for complete isolation to prevent module name collisions.
         """
         entry_point = manifest.entry_point
         if ":" not in entry_point:
             raise ValueError(
                 f"Invalid entry_point '{entry_point}'. "
-                f"Expected format: 'module.path:ClassName'"
+                f"Expected format: 'module_name:ClassName' or 'path.to.module:ClassName'"
             )
 
         module_path, class_name = entry_point.rsplit(":", 1)
+        
+        # Resolve file path
+        if "." in module_path:
+            file_path = plugin_dir / f"{module_path.replace('.', '/')}.py"
+        else:
+            file_path = plugin_dir / f"{module_path}.py"
 
-        # Add plugin directory to sys.path temporarily
+        if not file_path.exists():
+            raise FileNotFoundError(f"Plugin module file not found: {file_path}")
+
+        # Unique module name to prevent caching collisions across plugins
+        unique_module_name = f"uhr_plugin_{manifest.id.replace('.', '_')}"
+
+        spec = importlib.util.spec_from_file_location(unique_module_name, file_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"Could not load spec for {file_path}")
+
+        module = importlib.util.module_from_spec(spec)
+        # Register in sys.modules so inner imports work if they reference the module
+        sys.modules[unique_module_name] = module
+        
+        # We temporarily add the plugin dir to sys.path so the plugin can import relative files
         plugin_dir_str = str(plugin_dir)
         inserted = False
         if plugin_dir_str not in sys.path:
@@ -412,7 +430,7 @@ class PluginLoader:
             inserted = True
 
         try:
-            module = importlib.import_module(module_path)
+            spec.loader.exec_module(module)
             plugin_class = getattr(module, class_name)
 
             if not issubclass(plugin_class, PluginBase):

@@ -1,0 +1,66 @@
+INFO:     Started server process [30029]
+INFO:     Waiting for application startup.
+{"component": "api", "version": "2.0.0", "env": "development", "host": "0.0.0.0", "port": 8765, "event": "Universal Hardware Runtime starting", "level": "INFO", "timestamp": "2026-08-04T19:13:38.149957Z"}
+{"component": "event_bus", "event": "EventBus started", "level": "INFO", "timestamp": "2026-08-04T19:13:38.155313Z"}
+{"component": "api", "event": "Event Bus started", "level": "INFO", "timestamp": "2026-08-04T19:13:38.155666Z"}
+{"component": "database", "url": "sqlite+aiosqlite:", "event": "Database initialized", "level": "INFO", "timestamp": "2026-08-04T19:13:38.273512Z"}
+{"component": "api", "event": "Database initialized", "level": "INFO", "timestamp": "2026-08-04T19:13:38.273732Z"}
+{"component": "adapter_base", "event": "Adapter tool 'esptool.py' not found in PATH", "level": "WARNING", "timestamp": "2026-08-04T19:13:38.292416Z"}
+{"component": "adapter_base", "event": "Adapter tool 'arduino-cli' not found in PATH", "level": "WARNING", "timestamp": "2026-08-04T19:13:38.298133Z"}
+{"component": "task_scheduler", "workers": 3, "event": "Task Scheduler started", "level": "INFO", "timestamp": "2026-08-04T19:13:38.298490Z"}
+{"component": "device_registry", "count": 0, "event": "Loaded devices from registry", "level": "INFO", "timestamp": "2026-08-04T19:13:38.322828Z"}
+{"component": "device_discovery", "interval": 5.0, "event": "Device discovery started", "level": "INFO", "timestamp": "2026-08-04T19:13:38.324790Z"}
+{"component": "plugin_loader", "count": 2, "directory": "plugins", "event": "Scanning plugins", "level": "INFO", "timestamp": "2026-08-04T19:13:38.329368Z"}
+{"component": "plugin_arduino", "event": "Initialized Arduino AVR & SAMD Support v1.0.0", "level": "INFO", "timestamp": "2026-08-04T19:13:38.362469Z"}
+{"component": "plugin_loader", "plugin_id": "cc.arduino.avr", "version": "1.0.0", "capabilities": ["flash", "build", "serial", "reset"], "event": "Plugin loaded successfully", "level": "INFO", "timestamp": "2026-08-04T19:13:38.362657Z"}
+{"component": "plugin_esp32", "event": "Initialized ESP32 Family Support v1.0.0", "level": "INFO", "timestamp": "2026-08-04T19:13:38.369990Z"}
+{"component": "plugin_loader", "plugin_id": "com.espressif.esp32", "version": "1.0.0", "capabilities": ["flash", "erase", "read_flash", "serial", "reset"], "event": "Plugin loaded successfully", "level": "INFO", "timestamp": "2026-08-04T19:13:38.370160Z"}
+{"component": "plugin_loader", "total": 2, "loaded": 2, "event": "Plugin loading complete", "level": "INFO", "timestamp": "2026-08-04T19:13:38.370273Z"}
+{"component": "api", "count": 2, "event": "Plugins loaded", "level": "INFO", "timestamp": "2026-08-04T19:13:38.370352Z"}
+{"component": "api", "api_key": "YaUUcjiimWc3dironk7XUTdEfzt4oxIbukUhcrsKKrI", "event": "API Key (development mode \u2014 set UHR_API_KEY env var for production)", "level": "INFO", "timestamp": "2026-08-04T19:13:38.370420Z"}
+{"component": "api", "version": "2.0.0", "dashboard_url": "http://0.0.0.0:8765", "api_docs_url": "http://0.0.0.0:8765/docs", "event": "Universal Hardware Runtime READY", "level": "INFO", "timestamp": "2026-08-04T19:13:38.370477Z"}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8765 (Press CTRL+C to quit)
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:13:38.413242Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:13:43.417710Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:13:48.426311Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:13:53.432009Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:13:58.439291Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:03.444384Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:08.451056Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:13.459422Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:18.462494Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:23.466046Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:28.469714Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:33.473438Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:38.478281Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:43.481086Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:48.483750Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:53.487684Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:14:58.498666Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:15:03.513495Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:15:08.519632Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:15:13.525163Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:15:18.530289Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:15:23.571882Z"}
+{"component": "usb_enumerator", "device_count": 0, "event": "USB enumeration complete", "level": "INFO", "timestamp": "2026-08-04T19:15:28.577040Z"}
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+{"component": "api", "event": "Universal Hardware Runtime shutting down", "level": "INFO", "timestamp": "2026-08-04T19:15:31.860016Z"}
+{"component": "device_discovery", "event": "Device discovery stopped", "level": "INFO", "timestamp": "2026-08-04T19:15:31.860904Z"}
+{"component": "api", "event": "Device discovery stopped", "level": "INFO", "timestamp": "2026-08-04T19:15:31.861051Z"}
+{"component": "task_scheduler", "event": "Task Scheduler stopped", "level": "INFO", "timestamp": "2026-08-04T19:15:31.862277Z"}
+{"component": "api", "event": "Task scheduler stopped", "level": "INFO", "timestamp": "2026-08-04T19:15:31.862406Z"}
+{"component": "plugin_arduino", "event": "Shutting down Arduino AVR & SAMD Support", "level": "INFO", "timestamp": "2026-08-04T19:15:31.862504Z"}
+{"component": "plugin_loader", "plugin_id": "cc.arduino.avr", "event": "Plugin unloaded", "level": "INFO", "timestamp": "2026-08-04T19:15:31.862572Z"}
+{"component": "plugin_esp32", "event": "Shutting down ESP32 Family Support", "level": "INFO", "timestamp": "2026-08-04T19:15:31.862651Z"}
+{"component": "plugin_loader", "plugin_id": "com.espressif.esp32", "event": "Plugin unloaded", "level": "INFO", "timestamp": "2026-08-04T19:15:31.862707Z"}
+{"component": "api", "event": "Plugins unloaded", "level": "INFO", "timestamp": "2026-08-04T19:15:31.862765Z"}
+{"component": "event_bus", "total_events": 1, "event": "EventBus stopping", "level": "INFO", "timestamp": "2026-08-04T19:15:31.862813Z"}
+{"component": "event_bus", "total_events": 1, "total_errors": 0, "event": "EventBus stopped", "level": "INFO", "timestamp": "2026-08-04T19:15:31.863457Z"}
+{"component": "api", "event": "Event Bus stopped", "level": "INFO", "timestamp": "2026-08-04T19:15:31.863553Z"}
+{"component": "database", "event": "Database connection closed", "level": "INFO", "timestamp": "2026-08-04T19:15:31.875563Z"}
+{"component": "api", "event": "Database closed", "level": "INFO", "timestamp": "2026-08-04T19:15:31.875713Z"}
+{"component": "api", "event": "Shutdown complete", "level": "INFO", "timestamp": "2026-08-04T19:15:31.875801Z"}
+INFO:     Application shutdown complete.
+INFO:     Finished server process [30029]
