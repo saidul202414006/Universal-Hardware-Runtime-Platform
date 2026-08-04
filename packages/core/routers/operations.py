@@ -15,18 +15,16 @@ or subscribe to /ws/v1/tasks/{task_id} for real-time progress.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from packages.core.routers.tasks import register_task
 from packages.core.runtime_state import RuntimeState, get_runtime_state
 from packages.core.security import RequireAuth
 from packages.types.base import BaseResponse
 from packages.types.device import DeviceState
-from packages.types.event import Event, EventCategory
+from packages.types.task import Task, TaskType
 
 router = APIRouter(prefix="/api/v1", tags=["Build & Flash"])
 
@@ -42,8 +40,11 @@ def _get_state() -> RuntimeState:
 
 class BuildRequest(BaseModel):
     """Request body for firmware build operations."""
+
     project_path: str = Field(description="Path to firmware project directory")
-    target_board: str = Field(description="Target board identifier, e.g. 'esp32', 'arduino:avr:uno'")
+    target_board: str = Field(
+        description="Target board identifier, e.g. 'esp32', 'arduino:avr:uno'"
+    )
     device_id: str | None = Field(default=None, description="Target device ID (optional for build)")
     clean_build: bool = Field(default=False, description="Clean before building")
     extra_flags: list[str] = Field(default_factory=list, description="Extra compiler flags")
@@ -51,10 +52,13 @@ class BuildRequest(BaseModel):
 
 class FlashRequest(BaseModel):
     """Request body for firmware flash operations — DANGEROUS."""
+
     device_id: str = Field(description="Target device ID to flash")
     firmware_path: str = Field(description="Path to compiled firmware file (.bin, .hex, .uf2)")
     flash_address: str = Field(default="0x0", description="Flash start address (ESP32: '0x0')")
-    verify_after_flash: bool = Field(default=True, description="Verify flash contents after writing")
+    verify_after_flash: bool = Field(
+        default=True, description="Verify flash contents after writing"
+    )
     # SAFETY: explicit confirmation required
     confirmed: bool = Field(
         description="Must be True to proceed. Flash OVERWRITES existing firmware.",
@@ -63,6 +67,7 @@ class FlashRequest(BaseModel):
 
 class EraseRequest(BaseModel):
     """Request body for flash erase — EXTREMELY DANGEROUS."""
+
     device_id: str = Field(description="Target device ID")
     # SAFETY: explicit confirmation required
     confirmed: bool = Field(
@@ -102,28 +107,17 @@ async def build_firmware(req: BuildRequest) -> BaseResponse:
         )
 
     task_id = str(uuid.uuid4())
-    task_data = {
-        "id": task_id,
-        "task_type": "build",
-        "state": "queued",
-        "device_id": req.device_id,
-        "params": req.model_dump(),
-        "progress": 0.0,
-        "progress_message": "Queued for build",
-        "log_lines": [],
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "correlation_id": str(uuid.uuid4()),
-    }
-    register_task(task_data)
-
-    await state.event_bus.publish(
-        Event.create(
-            event_type="build.started",
-            category=EventCategory.BUILD,
-            source="api",
-            payload={"task_id": task_id, "project": req.project_path, "board": req.target_board},
-        )
+    task = Task(
+        id=task_id,
+        task_type=TaskType.BUILD,
+        device_id=req.device_id,
+        params=req.model_dump(),
+        created_by="api",
     )
+
+    # In a real build, we'd wait for the task scheduler to pick it up.
+    # The submission to the scheduler is async.
+    await state.task_scheduler.submit(task)
 
     return BaseResponse.ok(
         message="Build task queued successfully",
@@ -198,36 +192,18 @@ async def flash_firmware(req: FlashRequest) -> BaseResponse:
         )
 
     task_id = str(uuid.uuid4())
-    task_data = {
-        "id": task_id,
-        "task_type": "flash",
-        "state": "queued",
-        "device_id": req.device_id,
-        "params": req.model_dump(),
-        "progress": 0.0,
-        "progress_message": "Queued for flash",
-        "log_lines": [],
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "correlation_id": str(uuid.uuid4()),
-    }
-    register_task(task_data)
+    task = Task(
+        id=task_id,
+        task_type=TaskType.FLASH,
+        device_id=req.device_id,
+        params=req.model_dump(),
+        created_by="api",
+    )
 
-    # Lock device immediately
     device.lock(task_id)
     device.transition_to(DeviceState.BUSY)
 
-    await state.event_bus.publish(
-        Event.create(
-            event_type="flash.started",
-            category=EventCategory.FLASH,
-            source="api",
-            payload={
-                "task_id": task_id,
-                "device_id": req.device_id,
-                "firmware": req.firmware_path,
-            },
-        )
-    )
+    await state.task_scheduler.submit(task)
 
     return BaseResponse.ok(
         message="Flash task queued. Device is now locked.",
@@ -288,31 +264,18 @@ async def erase_flash(req: EraseRequest) -> BaseResponse:
         )
 
     task_id = str(uuid.uuid4())
-    task_data = {
-        "id": task_id,
-        "task_type": "erase",
-        "state": "queued",
-        "device_id": req.device_id,
-        "params": req.model_dump(),
-        "progress": 0.0,
-        "progress_message": "Queued for erase",
-        "log_lines": [],
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "correlation_id": str(uuid.uuid4()),
-    }
-    register_task(task_data)
+    task = Task(
+        id=task_id,
+        task_type=TaskType.ERASE,
+        device_id=req.device_id,
+        params=req.model_dump(),
+        created_by="api",
+    )
 
     device.lock(task_id)
     device.transition_to(DeviceState.BUSY)
 
-    await state.event_bus.publish(
-        Event.create(
-            event_type="flash.erase_started",
-            category=EventCategory.FLASH,
-            source="api",
-            payload={"task_id": task_id, "device_id": req.device_id},
-        )
-    )
+    await state.task_scheduler.submit(task)
 
     return BaseResponse.ok(
         message="Erase task queued. ALL flash contents will be permanently deleted.",
@@ -322,5 +285,7 @@ async def erase_flash(req: EraseRequest) -> BaseResponse:
             "device_id": req.device_id,
             "monitor_url": f"/api/v1/tasks/{task_id}",
         },
-        warnings=["DESTRUCTIVE: All flash contents will be permanently erased. This cannot be undone."],
+        warnings=[
+            "DESTRUCTIVE: All flash contents will be permanently erased. This cannot be undone."
+        ],
     )

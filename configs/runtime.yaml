@@ -118,6 +118,6 @@ mcp:
 dashboard:
   enabled: true
   # Path to built Next.js static files
-  static_dir: "apps/dashboard/.next"
+  static_dir: "apps/dashboard/out"
   # If serving dashboard from runtime
   serve_dashboard: true

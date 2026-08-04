@@ -25,11 +25,12 @@ from __future__ import annotations
 import asyncio
 import json
 import shutil
+from datetime import UTC
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
-from packages.core.config import RuntimeConfig, load_config, RUNTIME_VERSION
+from packages.core.config import RUNTIME_VERSION, RuntimeConfig, load_config
 from packages.core.database import initialize_database
 from packages.core.event_bus import initialize_event_bus
 from packages.core.plugin_loader import PluginLoader
@@ -69,6 +70,7 @@ def _get_state() -> RuntimeState:
 # Tool 1: system_info
 # =============================================================================
 
+
 @mcp.tool()
 async def system_info() -> dict[str, Any]:
     """
@@ -96,6 +98,7 @@ async def system_info() -> dict[str, Any]:
 # =============================================================================
 # Tool 2: scan_devices
 # =============================================================================
+
 
 @mcp.tool()
 async def scan_devices() -> dict[str, Any]:
@@ -143,6 +146,7 @@ async def scan_devices() -> dict[str, Any]:
 # =============================================================================
 # Tool 3: identify_device
 # =============================================================================
+
 
 @mcp.tool()
 async def identify_device(device_id: str) -> dict[str, Any]:
@@ -193,6 +197,7 @@ async def identify_device(device_id: str) -> dict[str, Any]:
 # Tool 4: list_plugins
 # =============================================================================
 
+
 @mcp.tool()
 async def list_plugins() -> dict[str, Any]:
     """
@@ -224,6 +229,7 @@ async def list_plugins() -> dict[str, Any]:
 # Tool 5: build_project
 # =============================================================================
 
+
 @mcp.tool()
 async def build_project(
     project_path: str,
@@ -246,7 +252,8 @@ async def build_project(
     Returns task_id for monitoring with task_status.
     """
     import uuid
-    from datetime import datetime, timezone
+    from datetime import datetime
+
     from packages.core.routers.tasks import register_task
 
     state = _get_state()
@@ -265,7 +272,7 @@ async def build_project(
         "progress": 0.0,
         "progress_message": "Queued for build",
         "log_lines": [],
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "correlation_id": str(uuid.uuid4()),
         "created_by": "mcp",
     }
@@ -296,6 +303,7 @@ async def build_project(
 # Tool 6: flash_firmware  [DANGEROUS]
 # =============================================================================
 
+
 @mcp.tool()
 async def flash_firmware(
     device_id: str,
@@ -320,8 +328,9 @@ async def flash_firmware(
     Returns task_id for monitoring with task_status.
     """
     import uuid
-    from datetime import datetime, timezone
+    from datetime import datetime
     from pathlib import Path
+
     from packages.core.routers.tasks import register_task
 
     if not confirmed:
@@ -373,13 +382,14 @@ async def flash_firmware(
         "progress": 0.0,
         "progress_message": "Queued for flash",
         "log_lines": [],
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "correlation_id": str(uuid.uuid4()),
         "created_by": "mcp",
     }
     register_task(task_data)
 
     from packages.types.device import DeviceState
+
     device.lock(task_id)
     device.transition_to(DeviceState.BUSY)
 
@@ -410,6 +420,7 @@ async def flash_firmware(
 # Tool 7: erase_flash  [DANGEROUS]
 # =============================================================================
 
+
 @mcp.tool()
 async def erase_flash(device_id: str, confirmed: bool) -> dict[str, Any]:
     """
@@ -426,7 +437,8 @@ async def erase_flash(device_id: str, confirmed: bool) -> dict[str, Any]:
     Returns task_id for monitoring with task_status.
     """
     import uuid
-    from datetime import datetime, timezone
+    from datetime import datetime
+
     from packages.core.routers.tasks import register_task
 
     if not confirmed:
@@ -468,13 +480,14 @@ async def erase_flash(device_id: str, confirmed: bool) -> dict[str, Any]:
         "progress": 0.0,
         "progress_message": "Queued for erase",
         "log_lines": [],
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "correlation_id": str(uuid.uuid4()),
         "created_by": "mcp",
     }
     register_task(task_data)
 
     from packages.types.device import DeviceState
+
     device.lock(task_id)
     device.transition_to(DeviceState.BUSY)
 
@@ -500,6 +513,7 @@ async def erase_flash(device_id: str, confirmed: bool) -> dict[str, Any]:
 # =============================================================================
 # Tool 8: open_serial
 # =============================================================================
+
 
 @mcp.tool()
 async def open_serial(device_id: str, baud_rate: int = 115200) -> dict[str, Any]:
@@ -552,6 +566,7 @@ async def open_serial(device_id: str, baud_rate: int = 115200) -> dict[str, Any]
 # Tool 9: close_serial
 # =============================================================================
 
+
 @mcp.tool()
 async def close_serial(device_id: str) -> dict[str, Any]:
     """
@@ -586,6 +601,7 @@ async def close_serial(device_id: str) -> dict[str, Any]:
 # =============================================================================
 # Tool 10: serial_write
 # =============================================================================
+
 
 @mcp.tool()
 async def serial_write(device_id: str, data: str, add_newline: bool = True) -> dict[str, Any]:
@@ -631,6 +647,7 @@ async def serial_write(device_id: str, data: str, add_newline: bool = True) -> d
 # Tool 11: task_status
 # =============================================================================
 
+
 @mcp.tool()
 async def task_status(task_id: str) -> dict[str, Any]:
     """
@@ -670,6 +687,7 @@ async def task_status(task_id: str) -> dict[str, Any]:
 # =============================================================================
 # Tool 12: cancel_task
 # =============================================================================
+
 
 @mcp.tool()
 async def cancel_task(task_id: str) -> dict[str, Any]:
@@ -718,6 +736,7 @@ async def cancel_task(task_id: str) -> dict[str, Any]:
 # Tool 13: get_logs
 # =============================================================================
 
+
 @mcp.tool()
 async def get_logs(
     level: str = "INFO",
@@ -734,7 +753,6 @@ async def get_logs(
 
     Returns recent log entries from the runtime log file.
     """
-    import os
     from pathlib import Path
 
     log_file = Path("logs/runtime.log")
@@ -770,7 +788,7 @@ async def get_logs(
         return {"error": True, "message": f"Failed to read logs: {exc}"}
 
     # Return last N entries
-    entries = entries[-min(limit, 500):]
+    entries = entries[-min(limit, 500) :]
     return {
         "entry_count": len(entries),
         "level_filter": level.upper(),
@@ -782,6 +800,7 @@ async def get_logs(
 # =============================================================================
 # Tool 14: run_diagnostics
 # =============================================================================
+
 
 @mcp.tool()
 async def run_diagnostics() -> dict[str, Any]:
@@ -823,7 +842,9 @@ async def run_diagnostics() -> dict[str, Any]:
     devices = state.list_devices()
     results["devices"] = {
         "connected": len(devices),
-        "list": [{"id": d.id, "name": d.name, "port": d.port, "state": d.state.value} for d in devices],
+        "list": [
+            {"id": d.id, "name": d.name, "port": d.port, "state": d.state.value} for d in devices
+        ],
     }
 
     # Plugins
@@ -858,6 +879,7 @@ async def run_diagnostics() -> dict[str, Any]:
     # Serial ports
     try:
         import serial.tools.list_ports
+
         ports = list(serial.tools.list_ports.comports())
         results["serial_ports"] = {
             "count": len(ports),
@@ -885,6 +907,7 @@ async def run_diagnostics() -> dict[str, Any]:
 # MCP Server initialization
 # =============================================================================
 
+
 async def _init_runtime(config: RuntimeConfig) -> RuntimeState:
     """Initialize runtime components for standalone MCP mode."""
     global _state
@@ -895,11 +918,58 @@ async def _init_runtime(config: RuntimeConfig) -> RuntimeState:
         output="console",  # MCP stdio mode — don't write to file
     )
 
+    from packages.core.adapter_manager import AdapterManager
+    from packages.core.device_discovery import DeviceDiscovery
+    from packages.core.device_registry import DeviceRegistry
+    from packages.core.task_scheduler import TaskScheduler
+    from packages.types.task import Task
+
     bus = initialize_event_bus()
     await bus.start()
 
     db = initialize_database(config.database.url)
     await db.initialize()
+
+    device_registry = DeviceRegistry(db)
+
+    adapter_manager = AdapterManager(config.adapters)
+    await adapter_manager.initialize()
+
+    task_scheduler = TaskScheduler(db, bus, max_concurrent=config.scheduler.max_concurrent_tasks)
+
+    async def handle_flash(task: Task) -> None:
+        device = state.get_device(task.device_id)
+        if not device:
+            raise Exception(f"Device {task.device_id} not found")
+        adapter = adapter_manager.get_adapter_for_device(device)
+        if not adapter:
+            raise Exception(f"No adapter found for device {device.name}")
+        await adapter.flash(device, task.params["firmware_path"], task, **task.params)
+
+    async def handle_erase(task: Task) -> None:
+        device = state.get_device(task.device_id)
+        if not device:
+            raise Exception(f"Device {task.device_id} not found")
+        adapter = adapter_manager.get_adapter_for_device(device)
+        if not adapter:
+            raise Exception(f"No adapter found for device {device.name}")
+        await adapter.erase(device, task)
+
+    async def handle_build(task: Task) -> None:
+        board = task.params.get("target_board", "")
+        adapter = (
+            adapter_manager.get_adapter("esptool")
+            if "esp" in board.lower()
+            else adapter_manager.get_adapter("arduino-cli")
+        )
+        if not adapter:
+            raise Exception(f"No adapter found to build for board {board}")
+        await adapter.build(task.params["project_path"], board, task)
+
+    task_scheduler.register_handler("flash", handle_flash)
+    task_scheduler.register_handler("erase", handle_erase)
+    task_scheduler.register_handler("build", handle_build)
+    await task_scheduler.start()
 
     plugin_loader = PluginLoader(plugins_dir=config.plugins.directory, event_bus=bus)
 
@@ -908,9 +978,25 @@ async def _init_runtime(config: RuntimeConfig) -> RuntimeState:
         event_bus=bus,
         database=db,
         plugin_loader=plugin_loader,
+        device_registry=device_registry,
+        device_discovery=None,
+        task_scheduler=task_scheduler,
     )
     set_runtime_state(state)
     _state = state
+
+    loaded_devices = await device_registry.load_all()
+    for d in loaded_devices:
+        state.add_device(d)
+
+    device_discovery = DeviceDiscovery(
+        event_bus=bus,
+        runtime_state=state,
+        scan_interval=config.discovery.scan_interval_seconds,
+        vid_pid_db_path=config.discovery.vid_pid_database,
+    )
+    state.device_discovery = device_discovery
+    await device_discovery.start()
 
     await plugin_loader.load_all(disabled=config.plugins.disabled)
     return state

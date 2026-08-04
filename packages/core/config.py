@@ -13,7 +13,6 @@ This ensures the platform can be configured without touching any files
 
 from __future__ import annotations
 
-import os
 import secrets
 from functools import lru_cache
 from pathlib import Path
@@ -63,7 +62,7 @@ class SecurityConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="UHR_SECURITY_", extra="ignore")
 
     @model_validator(mode="after")
-    def generate_api_key_if_missing(self) -> "SecurityConfig":
+    def generate_api_key_if_missing(self) -> SecurityConfig:
         """Auto-generate a secure API key if none is configured."""
         if not self.api_key:
             self.api_key = secrets.token_urlsafe(32)
@@ -144,8 +143,8 @@ class LoggingConfig(BaseSettings):
     """Logging configuration."""
 
     level: str = Field(default="INFO")
-    format: str = Field(default="json")   # json | console
-    output: str = Field(default="both")   # console | file | both
+    format: str = Field(default="json")  # json | console
+    output: str = Field(default="both")  # console | file | both
     file_path: str = Field(default="logs/runtime.log")
     max_file_size_mb: int = Field(default=50, ge=1)
     backup_count: int = Field(default=5, ge=0)
@@ -186,6 +185,16 @@ class MCPConfig(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="UHR_MCP_", extra="ignore")
 
 
+class DashboardConfig(BaseSettings):
+    """Web Dashboard configuration."""
+
+    enabled: bool = Field(default=True)
+    static_dir: str = Field(default="apps/dashboard/out")
+    serve_dashboard: bool = Field(default=True)
+
+    model_config = SettingsConfigDict(env_prefix="UHR_DASHBOARD_", extra="ignore")
+
+
 class RuntimeConfig(BaseSettings):
     """
     Root configuration object.
@@ -211,6 +220,7 @@ class RuntimeConfig(BaseSettings):
     serial: SerialConfig = Field(default_factory=SerialConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     mcp: MCPConfig = Field(default_factory=MCPConfig)
+    dashboard: DashboardConfig = Field(default_factory=DashboardConfig)
 
     model_config = SettingsConfigDict(
         env_prefix="UHR_",

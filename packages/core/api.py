@@ -17,8 +17,9 @@ from __future__ import annotations
 
 import time
 import uuid
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import Any
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -96,6 +97,12 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
             port=cfg.server.port,
         )
 
+        from packages.core.adapter_manager import AdapterManager
+        from packages.core.device_discovery import DeviceDiscovery
+        from packages.core.device_registry import DeviceRegistry
+        from packages.core.task_scheduler import TaskScheduler
+        from packages.types.task import Task
+
         # Event Bus
         bus = initialize_event_bus(queue_size=1000)
         await bus.start()
@@ -106,20 +113,95 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
         await db.initialize()
         logger.info("Database initialized")
 
+        # Device Registry
+        device_registry = DeviceRegistry(db)
+
+        # Adapters
+        adapter_manager = AdapterManager(cfg.adapters)
+        await adapter_manager.initialize()
+
+        # Task Scheduler
+        task_scheduler = TaskScheduler(db, bus, max_concurrent=cfg.scheduler.max_concurrent_tasks)
+
+        # Register Task Handlers
+        async def handle_flash(task: Task) -> None:
+            device = state.get_device(task.device_id)
+            if not device:
+                raise Exception(f"Device {task.device_id} not found")
+            adapter = adapter_manager.get_adapter_for_device(device)
+            if not adapter:
+                raise Exception(f"No adapter found for device {device.name}")
+
+            fw_path = task.params.get("firmware_path")
+            if not fw_path:
+                raise Exception("Missing firmware_path")
+
+            await adapter.flash(device, fw_path, task, **task.params)
+
+        async def handle_erase(task: Task) -> None:
+            device = state.get_device(task.device_id)
+            if not device:
+                raise Exception(f"Device {task.device_id} not found")
+            adapter = adapter_manager.get_adapter_for_device(device)
+            if not adapter:
+                raise Exception(f"No adapter found for device {device.name}")
+
+            await adapter.erase(device, task)
+
+        async def handle_build(task: Task) -> None:
+            # Build doesn't strictly need a device, but it needs an adapter
+            # We'll use the target_board to guess the adapter
+            board = task.params.get("target_board", "")
+            adapter = None
+            if "esp" in board.lower():
+                adapter = adapter_manager.get_adapter(
+                    "esptool"
+                )  # Note: esptool can't build, this will fail gracefully
+            else:
+                adapter = adapter_manager.get_adapter("arduino-cli")
+
+            if not adapter:
+                raise Exception(f"No adapter found to build for board {board}")
+
+            await adapter.build(task.params["project_path"], board, task)
+
+        task_scheduler.register_handler("flash", handle_flash)
+        task_scheduler.register_handler("erase", handle_erase)
+        task_scheduler.register_handler("build", handle_build)
+        await task_scheduler.start()
+
         # Plugin Loader
         plugin_loader = PluginLoader(
             plugins_dir=cfg.plugins.directory,
             event_bus=bus,
         )
 
-        # Runtime State (central dependency — must be set before routers are used)
+        # Runtime State
         state = RuntimeState(
             config=cfg,
             event_bus=bus,
             database=db,
             plugin_loader=plugin_loader,
+            device_registry=device_registry,
+            device_discovery=None,
+            task_scheduler=task_scheduler,
         )
         set_runtime_state(state)
+
+        # Load devices from DB into memory
+        loaded_devices = await device_registry.load_all()
+        for d in loaded_devices:
+            state.add_device(d)
+
+        # Device Discovery (starts background scanning)
+        device_discovery = DeviceDiscovery(
+            event_bus=bus,
+            runtime_state=state,
+            scan_interval=cfg.discovery.scan_interval_seconds,
+            vid_pid_db_path=cfg.discovery.vid_pid_database,
+        )
+        state.device_discovery = device_discovery
+        await device_discovery.start()
 
         # Load plugins
         await plugin_loader.load_all(disabled=cfg.plugins.disabled)
@@ -146,6 +228,12 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
 
         # ── SHUTDOWN ───────────────────────────────────────────────────────
         logger.info("Universal Hardware Runtime shutting down")
+
+        await device_discovery.stop()
+        logger.info("Device discovery stopped")
+
+        await task_scheduler.stop()
+        logger.info("Task scheduler stopped")
 
         await plugin_loader.unload_all()
         logger.info("Plugins unloaded")
@@ -198,7 +286,9 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
     from starlette.exceptions import HTTPException as StarletteHTTPException
 
     @app.exception_handler(StarletteHTTPException)
-    async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    async def custom_http_exception_handler(
+        request: Request, exc: StarletteHTTPException
+    ) -> JSONResponse:
         """
         Handle all HTTPExceptions uniformly.
         Router-raised exceptions have structured dict details.
@@ -208,19 +298,25 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
             # Our routers provide structured detail dicts
             return JSONResponse(
                 status_code=exc.status_code,
-                content={"success": False, "detail": exc.detail, "message": exc.detail.get("message", "")},
+                content={
+                    "success": False,
+                    "detail": exc.detail,
+                    "message": exc.detail.get("message", ""),
+                },
             )
         # Generic framework error (e.g., route not found, method not allowed)
         return JSONResponse(
             status_code=exc.status_code,
             content=BaseResponse.fail(
                 message=str(exc.detail),
-                errors=[ErrorDetail(
-                    error_code=f"HTTP_{exc.status_code}",
-                    message=str(exc.detail),
-                    root_cause="HTTP error",
-                    suggested_fix="Check the API documentation at /docs",
-                )],
+                errors=[
+                    ErrorDetail(
+                        error_code=f"HTTP_{exc.status_code}",
+                        message=str(exc.detail),
+                        root_cause="HTTP error",
+                        suggested_fix="Check the API documentation at /docs",
+                    )
+                ],
             ).model_dump(mode="json"),
         )
 
@@ -235,7 +331,9 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
         )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=BaseResponse.from_exception(exc, "INTERNAL_SERVER_ERROR").model_dump(mode="json"),
+            content=BaseResponse.from_exception(exc, "INTERNAL_SERVER_ERROR").model_dump(
+                mode="json"
+            ),
         )
 
     # ── Routers ───────────────────────────────────────────────────────────────
@@ -247,20 +345,55 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
     app.include_router(serial.router)
     app.include_router(ws_router)
 
-    # Root endpoint
-    @app.get("/", include_in_schema=False)
-    async def root() -> dict:
-        return {
-            "name": "Universal Hardware Runtime Platform",
-            "version": cfg.version,
-            "docs": "/docs",
-            "health": "/api/v1/system/health",
-        }
+    from pathlib import Path
+
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    dashboard_dir = Path(cfg.dashboard.static_dir)
+    if cfg.dashboard.enabled and dashboard_dir.exists():
+        app.mount("/_next", StaticFiles(directory=str(dashboard_dir / "_next")), name="next_static")
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        async def serve_dashboard(full_path: str):
+            if (
+                full_path.startswith("api/")
+                or full_path.startswith("ws/")
+                or full_path.startswith("docs")
+                or full_path.startswith("openapi.json")
+            ):
+                return JSONResponse(status_code=404, content={"message": "Not found"})
+
+            path = dashboard_dir / full_path
+            if path.exists() and path.is_file():
+                return FileResponse(path)
+
+            # HTML5 history fallback
+            html_path = dashboard_dir / f"{full_path}.html"
+            if html_path.exists():
+                return FileResponse(html_path)
+
+            index_path = dashboard_dir / "index.html"
+            if index_path.exists():
+                return FileResponse(index_path)
+
+            return JSONResponse(status_code=404, content={"message": "Not found"})
+    else:
+        # Root endpoint if dashboard not served
+        @app.get("/", include_in_schema=False)
+        async def root() -> dict:
+            return {
+                "name": "Universal Hardware Runtime Platform",
+                "version": cfg.version,
+                "docs": "/docs",
+                "health": "/api/v1/system/health",
+            }
 
     return app
 
 
 # ── Entry point for uvicorn ───────────────────────────────────────────────────
+
 
 def start() -> None:
     """Start the runtime server (CLI entry point)."""

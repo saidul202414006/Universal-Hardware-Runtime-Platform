@@ -6,13 +6,11 @@ Tests pub/sub, wildcard matching, priority ordering, and exception isolation.
 from __future__ import annotations
 
 import asyncio
-from typing import Any
-from unittest.mock import AsyncMock
 
 import pytest
 
-from packages.core.event_bus import EventBus, initialize_event_bus
-from packages.types.event import Event, EventCategory, EventPriority, EventType
+from packages.core.event_bus import EventBus
+from packages.types.event import Event, EventCategory
 
 
 @pytest.fixture
@@ -157,7 +155,7 @@ class TestEventBusExceptionIsolation:
         for i in range(5):
             await bus.publish(Event.create("test.event", EventCategory.SYSTEM, "src"))
 
-        await asyncio.sleep(0.3)  # Allow time for all 5 events to dispatch on ARM
+        await asyncio.sleep(0.5)  # Allow time for all 5 events to dispatch on ARM
         assert count == 5  # All delivered to good handler
         assert bus._running  # Bus still alive
 

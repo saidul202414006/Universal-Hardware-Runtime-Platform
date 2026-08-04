@@ -17,9 +17,12 @@ from typing import Any
 
 from packages.core.config import RuntimeConfig
 from packages.core.database import DatabaseManager
+from packages.core.device_discovery import DeviceDiscovery
+from packages.core.device_registry import DeviceRegistry
 from packages.core.event_bus import EventBus
 from packages.core.plugin_loader import PluginLoader
-from packages.logger import UHRLogger, get_logger
+from packages.core.task_scheduler import TaskScheduler
+from packages.logger import get_logger
 from packages.types.device import Device
 
 logger = get_logger("runtime_state")
@@ -38,6 +41,9 @@ class RuntimeState:
     event_bus: EventBus
     database: DatabaseManager
     plugin_loader: PluginLoader
+    device_registry: DeviceRegistry
+    device_discovery: DeviceDiscovery
+    task_scheduler: TaskScheduler
     started_at: float = field(default_factory=time.monotonic)
 
     # In-memory device registry (populated by device discovery)
