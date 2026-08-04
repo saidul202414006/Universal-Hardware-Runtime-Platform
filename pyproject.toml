@@ -86,6 +86,7 @@ all = [
 [project.scripts]
 uhr = "packages.core.cli:app"
 uhr-server = "packages.core.api:start"
+hardwaremcp = "packages.core.cli:hardwaremcp_start"
 
 [tool.hatch.build.targets.wheel]
 packages = ["packages"]
