@@ -349,8 +349,16 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
 
     from fastapi.responses import FileResponse
     from fastapi.staticfiles import StaticFiles
+    import os
 
-    dashboard_dir = Path(cfg.dashboard.static_dir)
+    # Determine absolute path to dashboard out directory based on package location
+    package_root = Path(__file__).parent.parent.parent.resolve()
+    
+    if os.path.isabs(cfg.dashboard.static_dir):
+        dashboard_dir = Path(cfg.dashboard.static_dir)
+    else:
+        dashboard_dir = package_root / cfg.dashboard.static_dir
+
     if cfg.dashboard.enabled and dashboard_dir.exists():
         app.mount("/_next", StaticFiles(directory=str(dashboard_dir / "_next")), name="next_static")
 
@@ -363,6 +371,9 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
                 or full_path.startswith("openapi.json")
             ):
                 return JSONResponse(status_code=404, content={"message": "Not found"})
+                
+            if not full_path or full_path == "/":
+                full_path = "index.html"
 
             path = dashboard_dir / full_path
             if path.exists() and path.is_file():
@@ -379,6 +390,7 @@ def create_app(config: RuntimeConfig | None = None) -> FastAPI:
 
             return JSONResponse(status_code=404, content={"message": "Not found"})
     else:
+        logger.warning(f"Dashboard directory not found at {dashboard_dir}, serving API only.")
         # Root endpoint if dashboard not served
         @app.get("/", include_in_schema=False)
         async def root() -> dict:
