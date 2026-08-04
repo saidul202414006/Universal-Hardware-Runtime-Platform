@@ -1,0 +1,22 @@
+id: "com.uhr.test_dummy"
+name: "Test Dummy Plugin"
+version: "1.0.0"
+author: "Test"
+license: "MIT"
+description: "Dummy plugin for testing plugin loader"
+runtime_version: ">=2.0.0"
+plugin_api_version: "1.0.0"
+vendor: "Test"
+family: "Test"
+supported_boards:
+  - test-board
+supported_platforms:
+  - linux
+  - windows
+  - macos
+  - android
+required_tools: []
+required_python_packages: []
+capabilities:
+  - serial
+entry_point: "plugin:DummyPlugin"

@@ -1,0 +1,24 @@
+id: "com.uhr.template"
+name: "Template Plugin"
+version: "1.0.0"
+author: "UHR Contributors"
+license: "MIT"
+description: "Template for creating new hardware plugins. Copy this directory and customize."
+runtime_version: ">=2.0.0"
+plugin_api_version: "1.0.0"
+vendor: "Generic"
+family: "Template"
+supported_boards: []
+supported_platforms:
+  - linux
+  - windows
+  - macos
+  - android
+required_tools: []
+required_python_packages: []
+capabilities: []
+entry_point: "plugin:TemplatePlugin"
+homepage: null
+repository: null
+tags:
+  - template
