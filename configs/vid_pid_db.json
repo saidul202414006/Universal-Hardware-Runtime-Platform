@@ -1,0 +1,117 @@
+{
+  "_comment": "USB VID/PID Database for hardware identification. VIDs and PIDs are hex strings.",
+  "_version": "1.0.0",
+  "_source": "Compiled from official vendor documentation and community resources",
+
+  "0x0403": {
+    "vendor": "FTDI",
+    "products": {
+      "0x6001": { "name": "FT232R UART", "board_hint": "generic", "chip": "FT232R" },
+      "0x6010": { "name": "FT2232H", "board_hint": "generic", "chip": "FT2232H" },
+      "0x6011": { "name": "FT4232H", "board_hint": "generic", "chip": "FT4232H" },
+      "0x6014": { "name": "FT232H", "board_hint": "generic", "chip": "FT232H" },
+      "0x6015": { "name": "FT230X", "board_hint": "generic", "chip": "FT230X" }
+    }
+  },
+
+  "0x10C4": {
+    "vendor": "Silicon Labs",
+    "products": {
+      "0xEA60": { "name": "CP210x UART Bridge", "board_hint": "esp32", "chip": "CP2102" },
+      "0xEA61": { "name": "CP210x UART Bridge", "board_hint": "esp32", "chip": "CP2103" },
+      "0xEA70": { "name": "CP2105 UART Bridge", "board_hint": "generic", "chip": "CP2105" }
+    }
+  },
+
+  "0x1A86": {
+    "vendor": "QinHeng Electronics (WCH)",
+    "products": {
+      "0x7523": { "name": "CH340 UART", "board_hint": "arduino", "chip": "CH340" },
+      "0x5523": { "name": "CH341 UART", "board_hint": "arduino", "chip": "CH341" },
+      "0x55D4": { "name": "CH9102 UART", "board_hint": "esp32", "chip": "CH9102" }
+    }
+  },
+
+  "0x303A": {
+    "vendor": "Espressif Systems",
+    "products": {
+      "0x0002": { "name": "ESP32-S2", "board_hint": "esp32-s2", "chip": "ESP32-S2" },
+      "0x0003": { "name": "ESP32-S3", "board_hint": "esp32-s3", "chip": "ESP32-S3" },
+      "0x1001": { "name": "ESP32-S2 ROM", "board_hint": "esp32-s2", "chip": "ESP32-S2" },
+      "0x4001": { "name": "ESP32-S3 ROM", "board_hint": "esp32-s3", "chip": "ESP32-S3" }
+    }
+  },
+
+  "0x2341": {
+    "vendor": "Arduino LLC",
+    "products": {
+      "0x0001": { "name": "Arduino Uno", "board_hint": "arduino-uno", "chip": "ATmega328P" },
+      "0x0010": { "name": "Arduino Mega 2560", "board_hint": "arduino-mega", "chip": "ATmega2560" },
+      "0x0036": { "name": "Arduino Leonardo Bootloader", "board_hint": "arduino-leonardo", "chip": "ATmega32U4" },
+      "0x0037": { "name": "Arduino Mega 2560 R3", "board_hint": "arduino-mega", "chip": "ATmega2560" },
+      "0x003B": { "name": "Arduino UNO WiFi", "board_hint": "arduino-uno-wifi", "chip": "ATmega328P" },
+      "0x003D": { "name": "Arduino Due (Programming Port)", "board_hint": "arduino-due", "chip": "SAM3X8E" },
+      "0x003E": { "name": "Arduino Due (Native Port)", "board_hint": "arduino-due", "chip": "SAM3X8E" },
+      "0x003F": { "name": "Arduino Mega ADK R3", "board_hint": "arduino-mega-adk", "chip": "ATmega2560" },
+      "0x0042": { "name": "Arduino Mega 2560 R3", "board_hint": "arduino-mega", "chip": "ATmega2560" },
+      "0x0043": { "name": "Arduino Uno R3", "board_hint": "arduino-uno", "chip": "ATmega328P" },
+      "0x0044": { "name": "Arduino Mega 2560 R3 (CDC)", "board_hint": "arduino-mega", "chip": "ATmega2560" },
+      "0x0045": { "name": "Arduino Uno R3 (CDC)", "board_hint": "arduino-uno", "chip": "ATmega328P" },
+      "0x8036": { "name": "Arduino Leonardo", "board_hint": "arduino-leonardo", "chip": "ATmega32U4" },
+      "0x8037": { "name": "Arduino Micro", "board_hint": "arduino-micro", "chip": "ATmega32U4" }
+    }
+  },
+
+  "0x2A03": {
+    "vendor": "Arduino SA",
+    "products": {
+      "0x0043": { "name": "Arduino Uno R3", "board_hint": "arduino-uno", "chip": "ATmega328P" },
+      "0x0010": { "name": "Arduino Mega 2560", "board_hint": "arduino-mega", "chip": "ATmega2560" }
+    }
+  },
+
+  "0x239A": {
+    "vendor": "Adafruit Industries",
+    "products": {
+      "0x800B": { "name": "Adafruit Feather M0", "board_hint": "adafruit-feather-m0", "chip": "ATSAMD21G18A" },
+      "0x800F": { "name": "Adafruit Feather 32u4", "board_hint": "adafruit-feather-32u4", "chip": "ATmega32U4" },
+      "0x8015": { "name": "Adafruit Trinket M0", "board_hint": "adafruit-trinket-m0", "chip": "ATSAMD21E18A" },
+      "0x801B": { "name": "Adafruit Metro M0 Express", "board_hint": "adafruit-metro-m0", "chip": "ATSAMD21G18A" }
+    }
+  },
+
+  "0x2E8A": {
+    "vendor": "Raspberry Pi",
+    "products": {
+      "0x0003": { "name": "Raspberry Pi Pico (RP2040 Boot)", "board_hint": "rp2040", "chip": "RP2040" },
+      "0x0004": { "name": "Raspberry Pi Pico W (RP2040)", "board_hint": "rp2040", "chip": "RP2040" },
+      "0x000A": { "name": "Raspberry Pi Pico 2 (RP2350)", "board_hint": "rp2350", "chip": "RP2350" },
+      "0x0005": { "name": "MicroPython (RP2040)", "board_hint": "rp2040", "chip": "RP2040" }
+    }
+  },
+
+  "0x0483": {
+    "vendor": "STMicroelectronics",
+    "products": {
+      "0x3748": { "name": "STM32 STLink", "board_hint": "stm32", "chip": "STM32" },
+      "0x374B": { "name": "STM32 STLink/V2-1", "board_hint": "stm32", "chip": "STM32" },
+      "0x374F": { "name": "STM32 STLink/V3", "board_hint": "stm32", "chip": "STM32" },
+      "0x5740": { "name": "STM32 Virtual COM Port", "board_hint": "stm32", "chip": "STM32" }
+    }
+  },
+
+  "0x1366": {
+    "vendor": "SEGGER Microcontroller",
+    "products": {
+      "0x0101": { "name": "J-Link", "board_hint": "generic-jtag", "chip": "various" },
+      "0x0105": { "name": "J-Link OB ARM", "board_hint": "generic-jtag", "chip": "various" }
+    }
+  },
+
+  "0x0D28": {
+    "vendor": "Arm (mbed)",
+    "products": {
+      "0x0204": { "name": "mbed LPC1768", "board_hint": "mbed", "chip": "LPC1768" }
+    }
+  }
+}

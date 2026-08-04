@@ -1,0 +1,123 @@
+# Universal Hardware Runtime Platform — Runtime Configuration
+# Version: 2.0.0
+# This file contains defaults. Override via environment variables or workspace config.
+
+version: "2.0.0"
+
+# =============================================================================
+# Server Configuration
+# =============================================================================
+server:
+  host: "0.0.0.0"
+  port: 8765
+  workers: 1
+  reload: false
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
+
+# =============================================================================
+# Security Configuration
+# =============================================================================
+security:
+  # API key is set via environment variable: UHR_API_KEY
+  # If not set, a random key is generated on first start and printed to console
+  api_key_header: "X-API-Key"
+  rate_limit_per_minute: 120
+  rate_limit_burst: 20
+  require_confirmation_for:
+    - "flash_firmware"
+    - "erase_flash"
+    - "delete_project"
+    - "reset_config"
+    - "shutdown_runtime"
+
+# =============================================================================
+# Database Configuration
+# =============================================================================
+database:
+  # default: SQLite. Set UHR_DATABASE_URL for PostgreSQL
+  url: "sqlite+aiosqlite:///./data/runtime.db"
+  echo: false
+  pool_size: 5
+  max_overflow: 10
+
+# =============================================================================
+# Device Discovery Configuration
+# =============================================================================
+discovery:
+  scan_interval_seconds: 5
+  hotplug_enabled: true
+  # VID/PID database path (relative to project root)
+  vid_pid_database: "configs/vid_pid_db.json"
+
+# =============================================================================
+# Task Scheduler Configuration
+# =============================================================================
+scheduler:
+  max_concurrent_tasks: 3
+  task_timeout_seconds: 300
+  max_retry_attempts: 3
+  retry_delay_seconds: 5
+  task_history_retention_days: 30
+
+# =============================================================================
+# Plugin System Configuration
+# =============================================================================
+plugins:
+  directory: "plugins"
+  auto_load: true
+  # Plugins listed here are disabled regardless of auto_load
+  disabled: []
+
+# =============================================================================
+# Adapter Configuration
+# =============================================================================
+adapters:
+  # Tool paths — empty means auto-detect from PATH
+  esptool_path: ""
+  arduino_cli_path: ""
+  avrdude_path: ""
+  openocd_path: ""
+  picotool_path: ""
+
+# =============================================================================
+# Serial Communication Defaults
+# =============================================================================
+serial:
+  default_baud_rate: 115200
+  timeout_seconds: 2
+  read_buffer_size: 4096
+  auto_reconnect: true
+  reconnect_delay_seconds: 2
+
+# =============================================================================
+# Logging Configuration
+# =============================================================================
+logging:
+  level: "INFO"
+  format: "json"       # json | console
+  output: "both"       # console | file | both
+  file_path: "logs/runtime.log"
+  max_file_size_mb: 50
+  backup_count: 5
+  include_caller: true
+
+# =============================================================================
+# MCP Server Configuration
+# =============================================================================
+mcp:
+  enabled: true
+  transport: "stdio"   # stdio | sse | streamable-http
+  server_name: "universal-hardware-runtime"
+  server_version: "2.0.0"
+
+# =============================================================================
+# Web Dashboard Configuration
+# =============================================================================
+dashboard:
+  enabled: true
+  # Path to built Next.js static files
+  static_dir: "apps/dashboard/.next"
+  # If serving dashboard from runtime
+  serve_dashboard: true
