@@ -1,0 +1,38 @@
+id: "com.espressif.esp32"
+name: "ESP32 Family Support"
+version: "1.0.0"
+author: "Universal Hardware Runtime Contributors"
+license: "MIT"
+description: "Core hardware support for ESP32, ESP32-S2, ESP32-S3, and ESP32-C3 via esptool."
+runtime_version: ">=2.0.0"
+plugin_api_version: "1.0.0"
+vendor: "Espressif"
+family: "ESP32"
+supported_boards:
+  - esp32
+  - esp32-s2
+  - esp32-s3
+  - esp32-c3
+  - esp8266
+supported_platforms:
+  - linux
+  - windows
+  - macos
+  - android
+required_tools:
+  - name: "esptool"
+    min_version: "4.0.0"
+    install_hint: "pip install esptool"
+required_python_packages:
+  - "esptool>=4.0"
+capabilities:
+  - flash
+  - erase
+  - read_flash
+  - serial
+  - reset
+entry_point: "plugin:ESP32Plugin"
+tags:
+  - esp32
+  - iot
+  - wifi

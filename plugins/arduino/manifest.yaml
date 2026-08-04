@@ -1,0 +1,36 @@
+id: "cc.arduino.avr"
+name: "Arduino AVR & SAMD Support"
+version: "1.0.0"
+author: "Universal Hardware Runtime Contributors"
+license: "MIT"
+description: "Hardware support for Arduino Uno, Mega, Leonardo, and Adafruit boards via arduino-cli."
+runtime_version: ">=2.0.0"
+plugin_api_version: "1.0.0"
+vendor: "Arduino"
+family: "Arduino"
+supported_boards:
+  - arduino-uno
+  - arduino-mega
+  - arduino-leonardo
+  - arduino-due
+  - adafruit-feather-m0
+supported_platforms:
+  - linux
+  - windows
+  - macos
+  - android
+required_tools:
+  - name: "arduino-cli"
+    min_version: "0.32.0"
+    install_hint: "curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh"
+required_python_packages: []
+capabilities:
+  - flash
+  - build
+  - serial
+  - reset
+entry_point: "plugin:ArduinoPlugin"
+tags:
+  - arduino
+  - avr
+  - samd

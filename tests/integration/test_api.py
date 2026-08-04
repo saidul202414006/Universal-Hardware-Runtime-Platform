@@ -26,7 +26,7 @@ def _make_config() -> RuntimeConfig:
     config.database = DatabaseConfig(url="sqlite+aiosqlite:///:memory:")
     config.logging = LoggingConfig(level="WARNING", format="console", output="console")
     config.security = SecurityConfig(api_key=TEST_API_KEY)
-    config.plugins.directory = "plugins"
+    config.plugins.directory = "tests/fixtures/plugins"
     return config
 
 
